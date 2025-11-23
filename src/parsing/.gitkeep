@@ -1,1 +1,43 @@
+import re
+
+def extract_unit_price_usd(text):
+    if not isinstance(text, str):
+        return None
+    pattern = r"USD\s*([\d\.]+)"
+    match = re.search(pattern, text.upper())
+    return float(match.group(1)) if match else None
+
+
+def extract_capacity(text):
+    if not isinstance(text, str):
+        return None
+    pattern = r"(\d+\.?\d*\s*(ML|L|LTR|INCH|CM))"
+    match = re.search(pattern, text.upper())
+    return match.group(1) if match else None
+
+
+def extract_model(text):
+    if not isinstance(text, str):
+        return None
+    pattern = r"([A-Z]+\s?[A-Z0-9\-]{2,})"
+    match = re.findall(pattern, text.upper())
+    return match[0] if match else None
+
+
+def extract_material(text):
+    if not isinstance(text, str):
+        return None
+    materials = ["GLASS", "WOOD", "STEEL", "BOROSILICATE", "PLASTIC"]
+    for m in materials:
+        if m in text.upper():
+            return m
+    return None
+
+
+def apply_parsing(df):
+    df["unit_price_usd"] = df["goods_description"].apply(extract_unit_price_usd)
+    df["capacity_spec"] = df["goods_description"].apply(extract_capacity)
+    df["model_name"] = df["goods_description"].apply(extract_model)
+    df["material_type"] = df["goods_description"].apply(extract_material)
+    return df
 
