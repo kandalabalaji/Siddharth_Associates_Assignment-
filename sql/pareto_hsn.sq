@@ -1,1 +1,24 @@
+WITH totals AS (
+    SELECT hsn_code, SUM(total_value_inr) AS value
+    FROM shipments
+    GROUP BY hsn_code
+),
+ranked AS (
+    SELECT
+        hsn_code,
+        value,
+        RANK() OVER (ORDER BY value DESC) AS rnk
+    FROM totals
+)
+SELECT * FROM ranked
+WHERE rnk <= 25
+
+UNION ALL
+
+SELECT
+    'OTHERS' AS hsn_code,
+    SUM(value) AS value,
+    NULL AS rnk
+FROM ranked
+WHERE rnk > 25;
 
