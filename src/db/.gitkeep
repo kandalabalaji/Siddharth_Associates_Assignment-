@@ -1,1 +1,21 @@
+import pandas as pd
+from sqlalchemy import create_engine
+
+def load_to_db(file_path):
+    df = pd.read_csv(file_path)
+
+    engine = create_engine("postgresql+psycopg2://user:password@localhost/trade_analysis")
+
+    df.to_sql(
+        "shipments",
+        engine,
+        if_exists="replace",
+        index=False,
+        chunksize=5000
+    )
+
+    print("Upload successful!")
+
+# Example:
+# load_to_db("data/processed/trade_cleaned.csv")
 
