@@ -1,1 +1,41 @@
+def apply_features(df):
+
+    # Grand total
+    df["grand_total_inr"] = (
+        df["total_value_(inr)"] + df["duty_paid_(inr)"]
+    )
+
+    # Landed cost
+    df["landed_cost_per_unit"] = df.apply(
+        lambda x: x["grand_total_inr"] / x["quantity"]
+        if x["quantity"] > 0 else None,
+        axis=1
+    )
+
+    # Category logic
+    def category(desc):
+        desc = str(desc).upper()
+        if "GLASS" in desc: return "Glass"
+        if "WOOD" in desc: return "Wooden"
+        if "STEEL" in desc or "SS" in desc: return "Steel"
+        if "PLASTIC" in desc: return "Plastic"
+        return "Others"
+
+    def subcategory(row):
+        desc = str(row["goods_description"]).upper()
+        cat = row["category"]
+
+        if cat == "Glass":
+            if "BOROSILICATE" in desc: return "Borosilicate"
+            if "OPAL" in desc: return "Opalware"
+        if cat == "Wooden":
+            if "SPOON" in desc: return "Spoon"
+            if "FORK" in desc: return "Fork"
+
+        return "Others"
+
+    df["category"] = df["goods_description"].apply(category)
+    df["sub_category"] = df.apply(subcategory, axis=1)
+
+    return df
 
