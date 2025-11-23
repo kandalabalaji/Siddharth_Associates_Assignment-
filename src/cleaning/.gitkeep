@@ -1,1 +1,37 @@
+import pandas as pd
+
+def clean_base(df):
+    # Standardize column names
+    df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
+
+    # Convert date
+    df["date_of_shipment"] = pd.to_datetime(
+        df["date_of_shipment"], format="%d/%m/%Y", errors="coerce"
+    )
+
+    df["year"] = df["date_of_shipment"].dt.year
+    df["month"] = df["date_of_shipment"].dt.month
+
+    # Basic missing handling
+    df["quantity"] = df["quantity"].fillna(0)
+    df["total_value_(inr)"] = df["total_value_(inr)"].fillna(0)
+    df["duty_paid_(inr)"] = df["duty_paid_(inr)"].fillna(0)
+
+    # Unit standardization
+    unit_map = {
+        "PCS": "PCS", "PC": "PCS", "NOS": "PCS",
+        "PIECE": "PCS", "PIECES": "PCS",
+        "KG": "KG", "KGS": "KG",
+        "MT": "MT", "METRIC TON": "MT"
+    }
+
+    def normalize_unit(u):
+        if not isinstance(u, str):
+            return None
+        u = u.strip().upper()
+        return unit_map.get(u, u)
+
+    df["unit_standardized"] = df["unit"].apply(normalize_unit)
+
+    return df
 
